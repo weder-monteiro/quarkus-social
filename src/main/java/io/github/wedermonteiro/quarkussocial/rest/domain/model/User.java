@@ -10,7 +10,7 @@ import javax.persistence.Table;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 @Entity
-@Table(name = "users")
+@Table(name = "\"USER\"")
 public class User extends PanacheEntityBase {
     
     @Id
