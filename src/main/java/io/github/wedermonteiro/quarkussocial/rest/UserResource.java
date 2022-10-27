@@ -1,7 +1,11 @@
 package io.github.wedermonteiro.quarkussocial.rest;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -23,15 +27,23 @@ import io.github.wedermonteiro.quarkussocial.rest.dto.CreateUserRequest;
 public class UserResource {
 
     private UserRepository userRepository;
+    private Validator validator;
     
     @Inject
-    public UserResource(UserRepository userRepository) {
+    public UserResource(UserRepository userRepository, Validator validator) {
         this.userRepository = userRepository;
+        this.validator = validator;
     };
 
     @POST
     @Transactional
     public Response createUser(CreateUserRequest userRequest) {
+        Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(userRequest);
+
+        if(!violations.isEmpty()) {
+            return Response.status(400).entity(violations.stream().findAny().get().getMessage()).build();
+        }
+
         User user = new User();
         user.setName(userRequest.getName());
         user.setAge(userRequest.getAge());
