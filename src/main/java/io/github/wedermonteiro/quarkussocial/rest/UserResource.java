@@ -1,5 +1,6 @@
 package io.github.wedermonteiro.quarkussocial.rest;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -13,13 +14,21 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import io.github.wedermonteiro.quarkussocial.rest.domain.model.User;
+import io.github.wedermonteiro.quarkussocial.rest.domain.repository.UserRepository;
 import io.github.wedermonteiro.quarkussocial.rest.dto.CreateUserRequest;
 
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
+
+    private UserRepository userRepository;
     
+    @Inject
+    public UserResource(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    };
+
     @POST
     @Transactional
     public Response createUser(CreateUserRequest userRequest) {
@@ -27,24 +36,24 @@ public class UserResource {
         user.setName(userRequest.getName());
         user.setAge(userRequest.getAge());
 
-        user.persist();
+        userRepository.persist(user);
 
         return Response.ok(user).build();
     }
 
     @GET
     public Response listAllUsers() {
-        return Response.ok(User.findAll().list()).build();
+        return Response.ok(userRepository.findAll().list()).build();
     }
 
     @DELETE
     @Path("{id}")
     @Transactional
     public Response deleteUser(@PathParam("id") Long id) {
-        User user = User.findById(id);
+        User user = userRepository.findById(id);
 
         if(user != null) {
-            user.delete();
+            userRepository.delete(user);
 
             return Response.ok().build();
         }
@@ -56,7 +65,7 @@ public class UserResource {
     @Path("{id}")
     @Transactional
     public Response updateUser(@PathParam("id") Long id, CreateUserRequest userData) {
-        User user = User.findById(id);
+        User user = userRepository.findById(id);
 
         if(user != null) {
             user.setName(userData.getName());
