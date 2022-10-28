@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response;
 import io.github.wedermonteiro.quarkussocial.rest.domain.model.User;
 import io.github.wedermonteiro.quarkussocial.rest.domain.repository.UserRepository;
 import io.github.wedermonteiro.quarkussocial.rest.dto.CreateUserRequest;
+import io.github.wedermonteiro.quarkussocial.rest.dto.ResponseError;
 
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -41,7 +42,10 @@ public class UserResource {
         Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(userRequest);
 
         if(!violations.isEmpty()) {
-            return Response.status(400).entity(violations.stream().findAny().get().getMessage()).build();
+            return Response
+                    .status(400)
+                    .entity(ResponseError.createFromValidation(violations))
+                    .build();
         }
 
         User user = new User();
