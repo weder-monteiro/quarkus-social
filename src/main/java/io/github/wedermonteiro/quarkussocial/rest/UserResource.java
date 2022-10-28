@@ -27,18 +27,18 @@ import io.github.wedermonteiro.quarkussocial.rest.dto.ResponseError;
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
 
-    private UserRepository userRepository;
+    private UserRepository repository;
     private Validator validator;
     
     @Inject
     public UserResource(UserRepository userRepository, Validator validator) {
-        this.userRepository = userRepository;
+        this.repository = userRepository;
         this.validator = validator;
     };
 
     @POST
     @Transactional
-    public Response createUser(CreateUserRequest userRequest) {
+    public Response save(CreateUserRequest userRequest) {
         Set<ConstraintViolation<CreateUserRequest>> violations = validator.validate(userRequest);
 
         if(!violations.isEmpty()) {
@@ -51,7 +51,7 @@ public class UserResource {
         user.setName(userRequest.getName());
         user.setAge(userRequest.getAge());
 
-        userRepository.persist(user);
+        repository.persist(user);
 
         return Response.status(Response.Status.CREATED.getStatusCode())
                 .entity(user)
@@ -59,18 +59,18 @@ public class UserResource {
     }
 
     @GET
-    public Response listAllUsers() {
-        return Response.ok(userRepository.findAll().list()).build();
+    public Response findAll() {
+        return Response.ok(repository.findAll().list()).build();
     }
 
     @DELETE
     @Path("{id}")
     @Transactional
-    public Response deleteUser(@PathParam("id") Long id) {
-        User user = userRepository.findById(id);
+    public Response delete(@PathParam("id") Long id) {
+        User user = repository.findById(id);
 
         if(user != null) {
-            userRepository.delete(user);
+            repository.delete(user);
 
             return Response.noContent().build();
         }
@@ -81,8 +81,8 @@ public class UserResource {
     @PUT
     @Path("{id}")
     @Transactional
-    public Response updateUser(@PathParam("id") Long id, CreateUserRequest userData) {
-        User user = userRepository.findById(id);
+    public Response update(@PathParam("id") Long id, CreateUserRequest userData) {
+        User user = repository.findById(id);
 
         if(user != null) {
             user.setName(userData.getName());

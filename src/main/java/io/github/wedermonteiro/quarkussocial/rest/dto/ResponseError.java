@@ -21,12 +21,11 @@ public class ResponseError {
     private Collection<FieldError> errors;
 
     public static <T> ResponseError createFromValidation(Set<ConstraintViolation<T>> violations) {
-        var message = "Validation Error";
-        List<FieldError> erros = violations.stream()
+        List<FieldError> errorList = violations.stream()
             .map(v -> new FieldError(v.getPropertyPath().toString(), v.getMessage()))
             .collect(Collectors.toList());
 
-        return new ResponseError(message, erros);
+        return new ResponseError("Validation Error", errorList);
     }
 
     public Response withStatusCode(int code) {
