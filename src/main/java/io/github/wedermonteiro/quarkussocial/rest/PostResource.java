@@ -1,8 +1,9 @@
 package io.github.wedermonteiro.quarkussocial.rest;
 
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.validation.Validator;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -17,6 +18,10 @@ import io.github.wedermonteiro.quarkussocial.rest.domain.model.User;
 import io.github.wedermonteiro.quarkussocial.rest.domain.repository.PostRepository;
 import io.github.wedermonteiro.quarkussocial.rest.domain.repository.UserRepository;
 import io.github.wedermonteiro.quarkussocial.rest.dto.CreatePostRequest;
+import io.github.wedermonteiro.quarkussocial.rest.dto.PostResponse;
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
+import io.quarkus.panache.common.Sort;
+import io.quarkus.panache.common.Sort.Direction;
 
 @Path("/users/{userId}/posts")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -61,7 +66,18 @@ public class PostResource {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
-        return Response.ok().build();
+        PanacheQuery<Post> query = postRepository.find(
+            "user", 
+            Sort.by("dateTime", Direction.Descending), 
+            user
+        );
+
+        var postResponseList = query.list()
+            .stream()
+            .map(PostResponse::fromEntity)
+            .collect(Collectors.toList());
+
+        return Response.ok(postResponseList).build();
     }
     
 }
