@@ -1,6 +1,7 @@
 package io.github.wedermonteiro.quarkussocial.rest;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -16,7 +17,7 @@ import io.github.wedermonteiro.quarkussocial.rest.domain.repository.FollowerRepo
 import io.github.wedermonteiro.quarkussocial.rest.domain.repository.UserRepository;
 import io.github.wedermonteiro.quarkussocial.rest.dto.FollowerRequest;
 
-@Path("/users/{id}/followers")
+@Path("/users/{userId}/followers")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class FollowerResource {
@@ -34,6 +35,7 @@ public class FollowerResource {
     }
 
     @PUT
+    @Transactional
     public Response followUser(@PathParam("userId") Long userId, FollowerRequest request) {
         User user = userRepository.findById(userId);
 
@@ -43,11 +45,13 @@ public class FollowerResource {
 
         User follower = userRepository.findById(request.getFollowerId());
 
-        var entity = new Follower();
-        entity.setUser(user);
-        entity.setFollower(follower);
-
-        followerRepository.persist(entity);
+        if(!followerRepository.follows(follower, user)) {
+            var entity = new Follower();
+            entity.setUser(user);
+            entity.setFollower(follower);
+    
+            followerRepository.persist(entity);
+        };
 
         return Response.status(Status.NO_CONTENT).build();
     }
