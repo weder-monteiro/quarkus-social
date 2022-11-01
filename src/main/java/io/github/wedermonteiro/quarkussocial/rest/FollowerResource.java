@@ -6,11 +6,13 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -76,7 +78,7 @@ public class FollowerResource {
         if(user == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
-        
+
         List<Follower> list = followerRepository.findByUser(userId);
         var responseObject = new FollowersPerUserResponse();
         responseObject.setFollowersCount(list.size());
@@ -84,6 +86,23 @@ public class FollowerResource {
         responseObject.setContent(followerList);
 
         return Response.ok(responseObject).build();
+    }
+
+    @DELETE
+    @Transactional
+    public Response unfollowUser(
+        @PathParam("userId") Long userId,
+        @QueryParam("followerId") Long followerId
+    ) {
+        User user = userRepository.findById(userId);
+
+        if(user == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        followerRepository.deleteByFollowerAndUser(followerId, userId);
+
+        return Response.status(Status.NO_CONTENT).build();
     }
 
 }

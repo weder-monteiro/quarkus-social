@@ -1,6 +1,7 @@
 package io.github.wedermonteiro.quarkussocial.rest.domain.repository;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -14,7 +15,7 @@ import io.quarkus.panache.common.Parameters;
 public class FollowerRepository implements PanacheRepository<Follower> {
 
     public boolean follows(User follower, User user) {
-        var params = Parameters
+        Map<String, Object> params = Parameters
             .with("follower", follower)
             .and("user", user)
             .map();
@@ -28,6 +29,15 @@ public class FollowerRepository implements PanacheRepository<Follower> {
         PanacheQuery<Follower> query = find("user.id", userId);
 
         return query.list();
+    }
+
+    public void deleteByFollowerAndUser(Long followerId, Long userId) {
+        Map<String, Object> params = Parameters
+            .with("userId", userId)
+            .and("followerId", followerId)
+            .map();
+
+        delete("follower.id = :followerId and user.id = :userId", params);
     }
 
 }
