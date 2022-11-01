@@ -59,7 +59,7 @@ public class UserResource {
     }
 
     @GET
-    public Response findAll() {
+    public Response listAll() {
         return Response.ok(repository.findAll().list()).build();
     }
 
