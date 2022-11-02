@@ -23,7 +23,7 @@ import java.util.Map;
 
 @QuarkusTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class UserResourceTest {
+class UserResourceTest {
 
     @TestHTTPResource("/users")
     URL apiURL;
